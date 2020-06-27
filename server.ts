@@ -28,6 +28,10 @@ app.get('/', (req, res) => {
  app.get('/messages', (req, res) => {
      res.send(data);
  });
+app.get('/messages/:id', (req, res) => {
+    let id = Number(req.params.id);
+    res.send(data[id-1]);
+});
 
  /*
   App routes end here.
