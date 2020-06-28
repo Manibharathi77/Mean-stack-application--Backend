@@ -10,6 +10,9 @@
  const app = express();
  const port = 1234;
  const MongoClient = require('mongodb').MongoClient;
+ let db;
+ let collections;
+ MongoClient.Promise = global.Promise;
 
 /**
  *  Imports ends here !!
@@ -35,16 +38,15 @@ app.use(bodyParser.urlencoded({extended: true}));
  * UnifiedTopology - Included to avoid the deprecated warnings.
  */
 
- MongoClient.connect(connectionString, {useUnifiedTopology: true}, (err, client) => {
-    if (err) return console.error(err);
-    console.log('Connected to Database');
-    client.close();
- });
+ MongoClient.connect(connectionString, {useUnifiedTopology: true}).then(client => {
+         db = client.db('DB4NodeJs');
+         collections = db.collection('SampleCollection');
+         console.log("inside the db operation block");
+     });
 
 /**
  * DB related code block ends here!!
  */
-
 
 /*
  App routes starts here.
@@ -56,9 +58,23 @@ app.use(bodyParser.urlencoded({extended: true}));
  app.get('/messages', (req, res) => {
      res.send(data);
  });
+
+ app.get('/getMessages/:id', (req,res) => {
+    collections.findOne({id: Number(req.params.id)},  (err, doc) => {
+        console.log("fetched value", doc);
+        res.send("Fetched the value successfully.");
+    })
+ });
+
  app.get('/messages/:id', (req, res) => {
     let id = Number(req.params.id);
     res.send(data[id-1]);
+     collections.insert(data[id-1]).then(
+         result => {
+            // console.log(result);
+             MongoClient.close();
+         })
+         .catch(error => console.error(error));
  });
 
 /**
