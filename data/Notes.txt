@@ -1,0 +1,9 @@
+
+
+Notes::
+
+Node js ->
+    single threaded.
+    Non-blocking.
+    Asynchronous.
+    Event driven.

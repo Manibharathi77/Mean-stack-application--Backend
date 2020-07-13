@@ -1,18 +1,19 @@
+
 /**
  * Imports starts here!
-  */
+ */
 
  const express = require('express');
- const bodyParser = require('body-parser');
- const corsOrigin = require('./corsOrigin.ts');
+ const bodyParser = require('body-parser'); // Learn
+ const corsOrigin = require('./server-related/corsOrigin.ts');
  const data = require('./data/MOCK_DATA.json');
  const cors = require('cors');
- const app = express();
+ const app = require('express')();
  const port = 1234;
  const MongoClient = require('mongodb').MongoClient;
- let db;
- let collections;
- MongoClient.Promise = global.Promise;
+
+const geoCode = require('./Weather-app/geoCode.ts');
+const foreCast = require('./Weather-app/foreCast.ts');
 
 /**
  *  Imports ends here !!
@@ -22,12 +23,16 @@
  * let(s) are declared here.
  * ConnectionString : connects to the database's connection/(table like).
  */
+let db;
+let collections;
+MongoClient.Promise = global.Promise;
+let connectionString =
+    'mongodb+srv://mani:7299728050O@cluster0-bgmld.mongodb.net/ProjectNode?retryWrites=true&w=majority';
 
-let connectionString = 'mongodb+srv://mani:7299728050O@cluster0-bgmld.mongodb.net/ProjectNode?retryWrites=true&w=majority';
-
-/*
+/**
  cors origin and other use.
  */
+
 app.use(cors(corsOrigin));
 app.use(express.static('StaticFile'));
 app.use(bodyParser.urlencoded({extended: true}));
@@ -48,7 +53,7 @@ app.use(bodyParser.urlencoded({extended: true}));
  * DB related code block ends here!!
  */
 
-/*
+/**
  App routes starts here.
  */
  app.get('/', (req, res) => {
@@ -66,15 +71,33 @@ app.use(bodyParser.urlencoded({extended: true}));
     })
  });
 
+/**
+ * Weather app related express blocks..
+ */
+
+app.get('/weatherDetail/:cityName', (req, res) => {
+     let cityName = req.params.cityName;
+     geoCode(cityName, (error, data) => {
+        foreCast(data , (error, response) => {
+             res.send(response);
+         });
+     });
+ });
+
+/**
+ * Weather app related express blocks ends here !!
+ */
+
+
  app.get('/messages/:id', (req, res) => {
     let id = Number(req.params.id);
-    res.send(data[id-1]);
      collections.insert(data[id-1]).then(
          result => {
             // console.log(result);
              MongoClient.close();
          })
          .catch(error => console.error(error));
+     res.send(data[id-1]);
  });
 
 /**
@@ -89,11 +112,11 @@ app.route('/route')
         res.send("Hello !!");
     }));
 
- /*
+ /**
   App routes end here.
   */
 
- /*
+ /**
   App listening on port --
   */
  app.listen(port, () => {
