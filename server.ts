@@ -78,7 +78,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.get('/weatherDetail/:cityName', (req, res) => {
      let cityName = req.params.cityName;
      geoCode(cityName, (error, data) => {
-        foreCast(data , (error, response) => {
+        foreCast(data , (response) => {
+            console.log(response);
              res.send(response);
          });
      });
